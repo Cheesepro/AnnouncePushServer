@@ -1,6 +1,7 @@
 package net.cheesepro.announcepushserver;
 
 import net.cheesepro.announcepushserver.api.Logger;
+import net.cheesepro.announcepushserver.config.Config;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -14,9 +15,11 @@ public class ThreadHandler implements Runnable{
 
     private Socket client = null ;
     private int count = 0;
+    Config config;
 
     public ThreadHandler(Socket client){
         this.client = client;
+        config = new Config();
     }
 
     public void run(){
@@ -29,29 +32,35 @@ public class ThreadHandler implements Runnable{
             boolean flag = true ;
             while(flag){
                 if(count==0){
-                    out.println("Input> ");
-                    out.println("Server> ");
-                    out.println("quit");
-                    out.println("true");
-                    out.println("Username> ");
-                    out.println("Password> ");
-                    if(!buf.readLine().equalsIgnoreCase("cheesepro youmadbro2013")){
-                        out.println("Incorrect login detail!");
-                        client.close();
-                        flag = false;
+                    out.println("5");
+                    out.println("exitcommand#"+config.get("commands.exit"));
+                    out.println("inputprefix#"+config.get("prefix.input"));
+                    out.println("serverprefix#"+config.get("prefix.server"));
+                    out.println("requirelogin#"+config.get("variables.requirelogin"));
+                    out.println("usernameprefix#"+config.get("prefix.username"));
+                    out.println("passwordprefix#" + config.get("prefix.password"));
+                    if(config.get("variables.requirelogin").equalsIgnoreCase("true")){
+                        if(!buf.readLine().equalsIgnoreCase("cheesepro youmadbro2013")){
+                            out.println("Incorrect login detail!");
+                            client.close();
+                            flag = false;
+                        }else{
+                            out.println("Successfully logged in!");
+                        }
                     }else{
                         out.println("Successfully logged in!");
                     }
+                    count++;
                 }
-                String str = buf.readLine() ;		// 接收客户端发送的内容
-                if(str==null||"".equals(str)){	// 表示没有内容
-                    flag = false ;	// 退出循环
+                String str = buf.readLine() ;
+                if(str==null||"".equals(str)){
+                    flag = false ;
                 }else{
-                    if("quit".equals(str)){	// 如果输入的内容为bye表示结束
+                    if(config.get("commands.exit").equals(str)){
                         Logger.write("Client disconnected from " + client.getInetAddress().getHostName());
                         flag = false ;
                     }else{
-                        out.println(str) ;	// 回应信息
+                        out.println(str) ;
                     }
                 }
             }
