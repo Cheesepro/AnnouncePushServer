@@ -4,12 +4,16 @@ import net.cheesepro.announcepushserver.api.Logger;
 import net.cheesepro.announcepushserver.config.Config;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
 
     public static boolean start;
+    public static List<String> logged = new ArrayList<String>();
 
     public static void main(String args[]) throws Exception {
 
@@ -33,9 +37,14 @@ public class Main {
         Logger.write("Server Running... Accepting clients.");
         while (start) {
             client = server.accept();
+            logged.add(client.getInetAddress().getHostName());
             new Thread(new ThreadHandler(client)).start();
         }
         server.close();
 
+    }
+
+    public List<String> getLogged(){
+        return logged;
     }
 }
